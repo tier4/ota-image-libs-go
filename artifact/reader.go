@@ -12,6 +12,9 @@ var (
 	ErrInvalidOTAImageArtifact = errors.New("ota image: not an OTA image")
 	ErrReadWithoutNext         = errors.New("ota image: Read before Next")
 	ErrOverlappedNext          = errors.New("ota image: Next before previous read finished")
+
+	// Inherit from std zip lib
+	ErrChecksum = zip.ErrChecksum
 )
 
 // A StreamReader streams file entries from an IO stream serving OTA image artifact.
@@ -179,7 +182,7 @@ func (fr *checksumFileStreamReader) Read(b []byte) (n int, err error) {
 	case err == nil && fr.nb == 0:
 		// normal EOF, check CRC32
 		if fr.hdr.CRC32 != 0 && fr.hash.Sum32() != fr.hdr.CRC32 {
-			err = zip.ErrChecksum
+			err = ErrChecksum
 			return n, err
 		}
 		return n, io.EOF
