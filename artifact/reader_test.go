@@ -113,7 +113,7 @@ func TestReadDamagedOTAImageA(t *testing.T) {
 	defer b.Close()
 
 	_, err = processTestFile(b)
-	// Expect to hit unexpected EOF err
+	// Expect to hit check sum error
 	if err != ErrChecksum {
 		t.Errorf("expected to get %v, but get %v", io.ErrUnexpectedEOF, err)
 	}
