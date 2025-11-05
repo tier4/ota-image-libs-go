@@ -32,4 +32,4 @@ go.work.sum
 # .vscode/
 
 # test file
-ota_image.zip
+./ota_image.zip
