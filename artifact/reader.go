@@ -180,7 +180,7 @@ func (fr *checksumFileStreamReader) Read(b []byte) (n int, err error) {
 	case err == io.EOF && fr.nb > 0:
 		return n, io.ErrUnexpectedEOF
 	case err == nil && fr.nb == 0:
-		// normal EOF, check CRC32
+		// finish up reading this file, check CRC32
 		if fr.hdr.CRC32 != 0 && fr.hash.Sum32() != fr.hdr.CRC32 {
 			err = ErrChecksum
 			return n, err
