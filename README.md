@@ -3,6 +3,27 @@
 Go libraries for streaming OTA Image version 1 artifact.
 
 This library implements std tar library like interface for streaming files from an sequential IO stream that serving OTA image artifact.
+Note that this library only guarantee properly streaming OTA image artifact!
+
+## OTA Image version 1 artifact
+
+Image artifact of OTA Image version 1 is a strict subset of ZIP archive, which has the following constrains:
+
+1. all file entries(blobs) don't have compression via ZIP, stored as plain file(compression is done during OTA image build, not by artifact packing).
+
+2. all file entries have fixed permission bit and datetime set.
+
+3. all file entries have size less than 32MiB (with exceptions when otaclient client update backward compatibility is enabled, but the extra files(otaclient release package) will still be much smaller than 4GiB).
+
+For details, see https://github.com/tier4/ota-image-builder/blob/main/src/ota_image_builder/cmds/pack_artifact.py.
+
+## Get started
+
+Installation:
+
+```shell
+go get github.com/tier4/ota-image-libs-go/artifact
+```
 
 Example:
 
@@ -56,5 +77,4 @@ func main() {
 		}
 	}
 }
-
 ```
