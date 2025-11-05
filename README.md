@@ -17,6 +17,16 @@ Image artifact of OTA Image version 1 is a strict subset of ZIP archive, which h
 
 For details, see https://github.com/tier4/ota-image-builder/blob/main/src/ota_image_builder/cmds/pack_artifact.py.
 
+## Usage
+
+This library exposes `Reader` for handling the OTA image artifact IO stream,
+the instance of `Reader` implements `Next` and `Read` API, similar to std `tar` package.
+
+Caller needs to first call `Next` to get the next file's local file header,
+and then `Read` API is ready for caller to read util the end of the corresponding file entry.
+
+Repeat the `Next` and `Read` calling until `Next` returns EOF, we can stream throught the whole artifact.
+
 ## Get started
 
 Installation:
@@ -52,7 +62,8 @@ func main() {
 	r := artifact.NewReader(f)
 
 	buf := make([]byte, 1024*1024) // 1MiB
-	for i := 0; ; {
+	var i int
+	for {
 		hdr, err := r.Next()
 		if err == io.EOF {
 			fmt.Printf("finish up reading! Total %d files read", i)
