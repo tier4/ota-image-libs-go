@@ -1,0 +1,38 @@
+name: test CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/test.yml'
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/test.yml'
+      - '**.go'
+      - 'go.mod'
+      - 'go.sum'
+
+jobs:
+  go-test:
+    name: Run go test
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Go
+        id: go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 'stable'
+          cache: true
+          cache-dependency-path: '**/go.sum'
+
+      - name: Go test
+        run: |
+          go test -v ./artifact
