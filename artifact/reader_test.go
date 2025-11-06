@@ -65,8 +65,11 @@ func TestReadOTAImageArtifact(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer b.Close()
-
+	defer func() {
+		if err := b.Close(); err != nil {
+			t.Logf("failed to close test file: %v", err)
+		}
+	}()
 	n, err := processTestFile(b)
 	if err != nil {
 		t.Error(err)
@@ -89,7 +92,11 @@ func TestReadTruncatedOTAImageA(t *testing.T) {
 	if err != nil {
 		t.Fatalf("failed to open test files")
 	}
-	defer b.Close()
+	defer func() {
+		if err := b.Close(); err != nil {
+			t.Logf("failed to close test file: %v", err)
+		}
+	}()
 
 	_, err = processTestFile(b)
 	// Expect to see unexpected EOF
@@ -110,7 +117,11 @@ func TestReadDamagedOTAImageA(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer b.Close()
+	defer func() {
+		if err := b.Close(); err != nil {
+			t.Logf("failed to close test file: %v", err)
+		}
+	}()
 
 	_, err = processTestFile(b)
 	// Expect to hit check sum error
@@ -131,7 +142,11 @@ func TestReadHeaderDamagedOTAImageA(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	defer b.Close()
+	defer func() {
+		if err := b.Close(); err != nil {
+			t.Logf("failed to close test file: %v", err)
+		}
+	}()
 
 	_, err = processTestFile(b)
 	// Expect to hit invalid OTA image error
