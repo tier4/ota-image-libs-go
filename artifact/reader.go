@@ -41,7 +41,7 @@ func (zr *StreamReader) Next() (*LocalFileHeader, error) {
 	}
 
 	// if previous read is not yet finished
-	if zr.curr != nil && zr.curr.nb != 0 {
+	if curr := zr.curr; curr != nil && curr.readBytes != curr.size {
 		return nil, ErrOverlappedNext
 	}
 
@@ -59,9 +59,8 @@ func (zr *StreamReader) next() (*LocalFileHeader, error) {
 		return nil, err
 	}
 
-	nb := int64(hdr.Size)
 	zr.curr = &checksumFileStreamReader{
-		hdr: hdr, r: zr.r, nb: nb, hash: crc32.NewIEEE(),
+		hdr: hdr, r: zr.r, size: hdr.Size, readBytes: 0, hash: crc32.NewIEEE(),
 	}
 	return hdr, nil
 }
@@ -95,8 +94,8 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 	b.uint16() // modified time
 	b.uint16() // modified date
 	hdr.CRC32 = b.uint32()
-	b.uint32()                    // compressed size
-	hdr.Size = uint64(b.uint32()) // uncompressed size
+	b.uint32()          // compressed size
+	uSize := b.uint32() // uncompressed size
 	filenameLen := int(b.uint16())
 	extraLen := int(b.uint16())
 	d := make([]byte, filenameLen+extraLen)
@@ -105,6 +104,7 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 	}
 	hdr.Name = string(d[:filenameLen])
 	extraField := d[filenameLen : filenameLen+extraLen]
+	hdr.Size = uint64(uSize)
 
 	// sanity check, OTA image artifact doesn't do compression
 	if compress_method != Store {
@@ -112,7 +112,7 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 	}
 
 	// check extra fields
-	needUSize := uint32(hdr.Size) == ^uint32(0)
+	needUSize := uSize == ^uint32(0)
 	for extra := readBuf(extraField); len(extra) >= 4; {
 		fieldTag := extra.uint16()
 		fieldSize := int(extra.uint16())
@@ -155,9 +155,10 @@ func (zr *StreamReader) Read(b []byte) (int, error) {
 }
 
 type checksumFileStreamReader struct {
-	hdr *LocalFileHeader
-	r   io.Reader // Underlying Reader
-	nb  int64     // Number of remaining bytes to read
+	hdr       *LocalFileHeader
+	r         io.Reader // underlying Reader
+	size      uint64    // size of the file
+	readBytes uint64    // bytes we already read
 
 	hash hash.Hash32 // for CRC32
 
@@ -166,20 +167,33 @@ type checksumFileStreamReader struct {
 // Read reads data chunk to [b] from the underlaying IO stream,
 // while doing CRC32 checksum calculation.
 func (fr *checksumFileStreamReader) Read(b []byte) (n int, err error) {
-	if int64(len(b)) > fr.nb {
-		b = b[:fr.nb]
+	// check how many bytes we should read
+	if fr.readBytes == fr.size {
+		return 0, io.EOF
+	}
+	if fr.readBytes > fr.size {
+		return 0, io.ErrUnexpectedEOF
+	}
+	nb := fr.size - fr.readBytes
+
+	// if we get a super long byte array, cap the input array
+	if uint64(len(b)) > nb {
+		b = b[:nb]
 	}
 
 	if len(b) > 0 {
 		n, err = fr.r.Read(b)
-		fr.nb -= int64(n)
+		fr.readBytes += uint64(n) // #nosec G115: conversion from int to uint64 is safe here as Read() returns non-negative values on success
 		fr.hash.Write(b[:n])
+
+		// see how many bytes to read we left
+		nb -= uint64(n) // #nosec G115: conversion is safe as n is non-negative
 	}
 
 	switch {
-	case err == io.EOF && fr.nb > 0:
+	case err == io.EOF && nb > 0:
 		return n, io.ErrUnexpectedEOF
-	case err == nil && fr.nb == 0:
+	case err == nil && nb == 0:
 		// finish up reading this file, check CRC32
 		if fr.hdr.CRC32 != 0 && fr.hash.Sum32() != fr.hdr.CRC32 {
 			err = ErrChecksum
