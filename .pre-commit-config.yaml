@@ -15,3 +15,9 @@ repos:
     hooks:
       - id: markdownlint
         args: ["-c", ".markdownlint.yaml", "--fix"]
+  - repo: https://github.com/golangci/golangci-lint
+    rev: v2.6.1
+    hooks:
+      -id: golangci-lint
+      -id: golangci-lint-fmt
+      -id: golangci-lint-config-verify
