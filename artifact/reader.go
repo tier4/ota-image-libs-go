@@ -94,8 +94,8 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 	b.uint16() // modified time
 	b.uint16() // modified date
 	hdr.CRC32 = b.uint32()
-	b.uint32()                    // compressed size
-	hdr.Size = uint64(b.uint32()) // uncompressed size
+	b.uint32()          // compressed size
+	uSize := b.uint32() // uncompressed size
 	filenameLen := int(b.uint16())
 	extraLen := int(b.uint16())
 	d := make([]byte, filenameLen+extraLen)
@@ -104,6 +104,7 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 	}
 	hdr.Name = string(d[:filenameLen])
 	extraField := d[filenameLen : filenameLen+extraLen]
+	hdr.Size = uint64(uSize)
 
 	// sanity check, OTA image artifact doesn't do compression
 	if compress_method != Store {
@@ -111,7 +112,7 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 	}
 
 	// check extra fields
-	needUSize := uint32(hdr.Size) == ^uint32(0)
+	needUSize := uSize == ^uint32(0)
 	for extra := readBuf(extraField); len(extra) >= 4; {
 		fieldTag := extra.uint16()
 		fieldSize := int(extra.uint16())
