@@ -180,11 +180,11 @@ func (fr *checksumFileStreamReader) Read(b []byte) (n int, err error) {
 
 	if len(b) > 0 {
 		n, err = fr.r.Read(b)
-		fr.readBytes += uint64(n) // #nosec G115 : we will not read negative bytes
+		fr.readBytes += uint64(n) // #nosec G115: conversion from int to uint64 is safe here as Read() returns non-negative values on success
 		fr.hash.Write(b[:n])
 
 		// see how many bytes to read we left
-		nb -= uint64(n) // #nosec G115
+		nb -= uint64(n) // #nosec G115: conversion is safe as n is non-negative
 	}
 
 	switch {
