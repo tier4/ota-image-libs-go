@@ -14,7 +14,7 @@ var testFS embed.FS
 type OTAImageArtifactTestFile struct {
 	Name       string
 	Size       uint64
-	FilesCount uint64 // total number of files in the artifact
+	FilesCount int // total number of files in the artifact
 }
 
 func openTestFile(fName string) (fs.File, error) {
@@ -76,7 +76,7 @@ func TestReadOTAImageArtifact(t *testing.T) {
 	}
 
 	// confirm that all files are read
-	if n != int(normalArtifact.FilesCount) {
+	if n != normalArtifact.FilesCount {
 		t.Errorf("files count mismatched")
 	}
 }
