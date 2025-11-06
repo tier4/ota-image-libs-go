@@ -33,3 +33,5 @@ go.work.sum
 
 # test file
 ./ota_image.zip
+
+venv
