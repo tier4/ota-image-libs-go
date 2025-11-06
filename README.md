@@ -15,7 +15,7 @@ Image artifact of OTA Image version 1 is a strict subset of ZIP archive, which h
 
 3. all file entries have size less than 32MiB (with exceptions when otaclient client update backward compatibility is enabled, but the extra files(otaclient release package) will still be much smaller than 4GiB).
 
-For details, see https://github.com/tier4/ota-image-builder/blob/main/src/ota_image_builder/cmds/pack_artifact.py.
+For details, see <https://github.com/tier4/ota-image-builder/blob/main/src/ota_image_builder/cmds/pack_artifact.py>.
 
 ## Usage
 
@@ -41,51 +41,51 @@ Example:
 package main
 
 import (
-	"fmt"
-	"io"
-	"os"
+ "fmt"
+ "io"
+ "os"
 
-	"github.com/tier4/ota-image-libs-go/artifact"
+ "github.com/tier4/ota-image-libs-go/artifact"
 )
 
 const fileToRead = "ota_image.zip"
 
 func main() {
-	fmt.Printf("will read %s\n", fileToRead)
+ fmt.Printf("will read %s\n", fileToRead)
 
-	f, err := os.Open(fileToRead)
-	if err != nil {
-		fmt.Printf("failed to open %s: %s", fileToRead, err)
-	}
-	defer f.Close()
+ f, err := os.Open(fileToRead)
+ if err != nil {
+  fmt.Printf("failed to open %s: %s", fileToRead, err)
+ }
+ defer f.Close()
 
-	r := artifact.NewReader(f)
+ r := artifact.NewReader(f)
 
-	buf := make([]byte, 1024*1024) // 1MiB
-	var i int
-	for {
-		hdr, err := r.Next()
-		if err == io.EOF {
-			fmt.Printf("finish up reading! Total %d files read", i)
-			return
-		}
-		if !hdr.IsDir() {
-			i += 1
-		}
+ buf := make([]byte, 1024*1024) // 1MiB
+ var i int
+ for {
+  hdr, err := r.Next()
+  if err == io.EOF {
+   fmt.Printf("finish up reading! Total %d files read", i)
+   return
+  }
+  if !hdr.IsDir() {
+   i += 1
+  }
 
-		if err != nil {
-			fmt.Printf("failed during streaming: %s", err)
-			return
-		}
-		fmt.Printf("This header #%d: %v\n", i, hdr)
+  if err != nil {
+   fmt.Printf("failed during streaming: %s", err)
+   return
+  }
+  fmt.Printf("This header #%d: %v\n", i, hdr)
 
         // reading the data of the file
-		for {
-			_, err := r.Read(buf)
-			if err == io.EOF {
-				break
-			}
-		}
-	}
+  for {
+   _, err := r.Read(buf)
+   if err == io.EOF {
+    break
+   }
+  }
+ }
 }
 ```
