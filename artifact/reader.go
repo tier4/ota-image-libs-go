@@ -168,6 +168,9 @@ type checksumFileStreamReader struct {
 // while doing CRC32 checksum calculation.
 func (fr *checksumFileStreamReader) Read(b []byte) (n int, err error) {
 	// check how many bytes we should read
+	if fr.readBytes == fr.size {
+		return 0, io.EOF
+	}
 	if fr.readBytes > fr.size {
 		return 0, io.ErrUnexpectedEOF
 	}
