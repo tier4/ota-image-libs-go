@@ -1,7 +1,7 @@
 exclude: ^vendor/|^test/tools/vendor/
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks.git
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: check-byte-order-marker
       - id: check-merge-conflict
@@ -16,7 +16,7 @@ repos:
       - id: markdownlint
         args: ["-c", ".markdownlint.yaml", "--fix"]
   - repo: https://github.com/golangci/golangci-lint
-    rev: v2.6.1
+    rev: v2.6.2
     hooks:
       - id: golangci-lint
       - id: golangci-lint-fmt
