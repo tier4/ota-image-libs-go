@@ -68,18 +68,16 @@ func main() {
   if err == io.EOF {
    fmt.Printf("finish up reading! Total %d files read", i)
    return
+  } else if err != nil {
+   fmt.Printf("failed during streaming: %s", err)
+   return
   }
   if !hdr.IsDir() {
    i += 1
   }
 
-  if err != nil {
-   fmt.Printf("failed during streaming: %s", err)
-   return
-  }
   fmt.Printf("This header #%d: %v\n", i, hdr)
-
-        // reading the data of the file
+  // reading the data of the file
   for {
    _, err := r.Read(buf)
    if err == io.EOF {
