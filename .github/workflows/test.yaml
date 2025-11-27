@@ -15,6 +15,12 @@ on:
       - '**.go'
       - 'go.mod'
       - 'go.sum'
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - review_requested
+      - assigned
   # allow the test CI to be manually triggerred
   workflow_dispatch:
 
