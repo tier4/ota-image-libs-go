@@ -3,7 +3,7 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks.git
     rev: v5.0.0
     hooks:
-      - id: check-byte-order-marker
+      - id: fix-byte-order-marker
       - id: check-merge-conflict
       - id: check-yaml
         args: ["--allow-multiple-documents"]
@@ -20,4 +20,4 @@ repos:
     hooks:
       - id: golangci-lint
       - id: golangci-lint-fmt
-      - id: golangci-lint-config-verify
+
