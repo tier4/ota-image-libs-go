@@ -41,49 +41,49 @@ Example:
 package main
 
 import (
-	"fmt"
-	"io"
-	"os"
+ "fmt"
+ "io"
+ "os"
 
-	"github.com/tier4/ota-image-libs-go/artifact"
+ "github.com/tier4/ota-image-libs-go/artifact"
 )
 
 const fileToRead = "ota_image.zip"
 
 func main() {
-	fmt.Printf("will read %s\n", fileToRead)
+ fmt.Printf("will read %s\n", fileToRead)
 
-	f, err := os.Open(fileToRead)
-	if err != nil {
-		fmt.Printf("failed to open %s: %s", fileToRead, err)
-	}
-	defer f.Close()
+ f, err := os.Open(fileToRead)
+ if err != nil {
+  fmt.Printf("failed to open %s: %s", fileToRead, err)
+ }
+ defer f.Close()
 
-	r := artifact.NewReader(f)
+ r := artifact.NewReader(f)
 
-	buf := make([]byte, 1024*1024) // 1MiB
-	var i int
-	for {
-		hdr, err := r.Next()
-		if err == io.EOF {
-			fmt.Printf("finish up reading! Total %d files read", i)
-			return
-		} else if err != nil {
-			fmt.Printf("failed during streaming: %s", err)
-			return
-		}
-		if !hdr.IsDir() {
-			i += 1
-		}
+ buf := make([]byte, 1024*1024) // 1MiB
+ var i int
+ for {
+  hdr, err := r.Next()
+  if err == io.EOF {
+   fmt.Printf("finish up reading! Total %d files read", i)
+   return
+  } else if err != nil {
+   fmt.Printf("failed during streaming: %s", err)
+   return
+  }
+  if !hdr.IsDir() {
+   i += 1
+  }
 
-		fmt.Printf("This header #%d: %v\n", i, hdr)
-		// reading the data of the file
-		for {
-			_, err := r.Read(buf)
-			if err == io.EOF {
-				break
-			}
-		}
-	}
+  fmt.Printf("This header #%d: %v\n", i, hdr)
+  // reading the data of the file
+  for {
+   _, err := r.Read(buf)
+   if err == io.EOF {
+    break
+   }
+  }
+ }
 }
 ```

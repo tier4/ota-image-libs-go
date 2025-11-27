@@ -20,4 +20,3 @@ repos:
     hooks:
       - id: golangci-lint
       - id: golangci-lint-fmt
-
