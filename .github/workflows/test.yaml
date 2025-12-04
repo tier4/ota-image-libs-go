@@ -36,7 +36,7 @@ jobs:
           go test -coverprofile ./.test/coverage.out -json -v ./artifact > ./.test/report.json
 
       - name: Upload test results
-        uses: sonarsource/sonarqube-scan-action@v6
+        uses: sonarsource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
