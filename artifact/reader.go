@@ -90,7 +90,7 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 	hdr := &LocalFileHeader{}
 	b.uint16() // min version for extraction
 	b.uint16() // general purpose flag
-	compress_method := b.uint16()
+	compressMethod := b.uint16()
 	b.uint16() // modified time
 	b.uint16() // modified date
 	hdr.CRC32 = b.uint32()
@@ -107,7 +107,7 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 	hdr.Size = uint64(uSize)
 
 	// sanity check, OTA image artifact doesn't do compression
-	if compress_method != Store {
+	if compressMethod != Store {
 		return nil, ErrInvalidOTAImageArtifact
 	}
 
