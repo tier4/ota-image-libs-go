@@ -32,4 +32,11 @@ jobs:
 
       - name: Go test
         run: |
-          go test -v ./artifact
+          mkdir -p ./.test
+          go test -coverprofile ./.test/coverage.out -json -v ./artifact 2>&1 | tee ./.test/report.json
+
+      - name: Upload test results
+        uses: sonarsource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
