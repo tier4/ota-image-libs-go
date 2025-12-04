@@ -98,6 +98,7 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 	uSize := b.uint32() // uncompressed size
 	filenameLen := int(b.uint16())
 	extraLen := int(b.uint16())
+
 	d := make([]byte, filenameLen+extraLen)
 	if _, err := io.ReadFull(r, d); err != nil {
 		return nil, err
@@ -122,15 +123,12 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 		fieldBuf := extra.sub(fieldSize)
 
 		// we only care about zip64 extension
-		switch fieldTag {
-		case zip64ExtraID:
-			if needUSize {
-				needUSize = false
-				if len(fieldBuf) < 8 {
-					return nil, zip.ErrFormat
-				}
-				hdr.Size = fieldBuf.uint64()
+		if fieldTag == zip64ExtraID && needUSize {
+			needUSize = false
+			if len(fieldBuf) < 8 {
+				return nil, zip.ErrFormat
 			}
+			hdr.Size = fieldBuf.uint64()
 		}
 	}
 
