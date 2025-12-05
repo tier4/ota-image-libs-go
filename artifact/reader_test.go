@@ -1,15 +1,12 @@
 package artifact
 
 import (
-	"embed"
 	"fmt"
 	"io"
 	"io/fs"
+	"os"
 	"testing"
 )
-
-//go:embed testdata/*
-var testFS embed.FS
 
 type OTAImageArtifactTestFile struct {
 	Name       string
@@ -18,7 +15,7 @@ type OTAImageArtifactTestFile struct {
 }
 
 func openTestFile(fName string) (fs.File, error) {
-	b, err := testFS.Open(fName)
+	b, err := os.Open(fmt.Sprintf("./testdata/%s", fName))
 	return b, err
 }
 
@@ -60,8 +57,7 @@ var normalArtifact = OTAImageArtifactTestFile{
 }
 
 func TestReadOTAImageArtifact(t *testing.T) {
-	testF := fmt.Sprintf("testdata/%s", normalArtifact.Name)
-	b, err := openTestFile(testF)
+	b, err := openTestFile(normalArtifact.Name)
 	if err != nil {
 		t.Error(err)
 	}
@@ -81,14 +77,40 @@ func TestReadOTAImageArtifact(t *testing.T) {
 	}
 }
 
+var otaImageWith6Gblob = OTAImageArtifactTestFile{
+	Name:       "ota_image_6g_blob.zip",
+	Size:       6369977451,
+	FilesCount: 2406, // exclude directories
+}
+
+func TestReadOTAImageArtifactWith6Gblob(t *testing.T) {
+	b, err := openTestFile(otaImageWith6Gblob.Name)
+	if err != nil {
+		t.Error(err)
+	}
+	defer func() {
+		if err := b.Close(); err != nil {
+			t.Logf("failed to close test file: %v", err)
+		}
+	}()
+	n, err := processTestFile(b)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// confirm that all files are read
+	if n != otaImageWith6Gblob.FilesCount {
+		t.Errorf("files count mismatched")
+	}
+}
+
 var truncatedArtifact = OTAImageArtifactTestFile{
 	Name: "ota_image_truncated.zip",
 	Size: 10485760,
 }
 
 func TestReadTruncatedOTAImageA(t *testing.T) {
-	testF := fmt.Sprintf("testdata/%s", truncatedArtifact.Name)
-	b, err := openTestFile(testF)
+	b, err := openTestFile(truncatedArtifact.Name)
 	if err != nil {
 		t.Fatalf("failed to open test files")
 	}
@@ -112,8 +134,7 @@ var damangedOTAImageArtifact = OTAImageArtifactTestFile{
 }
 
 func TestReadDamagedOTAImageA(t *testing.T) {
-	testF := fmt.Sprintf("testdata/%s", damangedOTAImageArtifact.Name)
-	b, err := openTestFile(testF)
+	b, err := openTestFile(damangedOTAImageArtifact.Name)
 	if err != nil {
 		t.Error(err)
 	}
@@ -137,8 +158,7 @@ var headerDamangedOTAImageArtifact = OTAImageArtifactTestFile{
 }
 
 func TestReadHeaderDamagedOTAImageA(t *testing.T) {
-	testF := fmt.Sprintf("testdata/%s", headerDamangedOTAImageArtifact.Name)
-	b, err := openTestFile(testF)
+	b, err := openTestFile(headerDamangedOTAImageArtifact.Name)
 	if err != nil {
 		t.Error(err)
 	}
