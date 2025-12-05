@@ -32,6 +32,8 @@ jobs:
 
       - name: Go test
         run: |
+          # prepare the ota_image_6g_blob.zip
+          zstd -d ./artifact/testdata/ota_image_6g_blob.zip.zst -o ./artifact/testdata/ota_image_6g_blob.zip
           mkdir -p ./.test
           go test -coverprofile ./.test/coverage.out -json -v ./artifact 2>&1 | tee ./.test/report.json
 
