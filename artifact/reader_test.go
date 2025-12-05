@@ -77,6 +77,33 @@ func TestReadOTAImageArtifact(t *testing.T) {
 	}
 }
 
+var otaImageWith6Gblob = OTAImageArtifactTestFile{
+	Name:       "ota_image_6g_blob.zip",
+	Size:       6369977451,
+	FilesCount: 2406, // exclude directories
+}
+
+func TestReadOTAImageArtifactWith6Gblob(t *testing.T) {
+	b, err := openTestFile(otaImageWith6Gblob.Name)
+	if err != nil {
+		t.Error(err)
+	}
+	defer func() {
+		if err := b.Close(); err != nil {
+			t.Logf("failed to close test file: %v", err)
+		}
+	}()
+	n, err := processTestFile(b)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// confirm that all files are read
+	if n != otaImageWith6Gblob.FilesCount {
+		t.Errorf("files count mismatched")
+	}
+}
+
 var truncatedArtifact = OTAImageArtifactTestFile{
 	Name: "ota_image_truncated.zip",
 	Size: 10485760,
