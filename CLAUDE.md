@@ -93,7 +93,17 @@ Uses only the Go standard library (`archive/zip`, `encoding/binary`, `hash/crc32
 - Triggers on PRs to `main`, pushes to `main` (when `.go`/`go.mod`/`go.sum` files change), and manual dispatch.
 - Runs `go test` with coverage on `ubuntu-latest` (timeout: 3 minutes).
 - Decompresses `ota_image_6g_blob.zip.zst` for the large file test.
-  Uploads coverage to SonarCloud.
+- Uploads coverage to SonarCloud.
+
+**`.github/workflows/claude-code-review.yml` — Claude Code Review**
+
+- Triggers on PRs (opened, synchronize, ready_for_review, reopened).
+- Runs automated code review using `anthropics/claude-code-action@v1` with the `code-review` plugin.
+
+**`.github/workflows/claude.yml` — Claude Code**
+
+- Triggers when `@claude` is mentioned in issue comments, PR review comments, PR reviews, or new issues.
+- Runs Claude Code via `anthropics/claude-code-action@v1` to respond to the mention.
 
 ## Code Style
 
