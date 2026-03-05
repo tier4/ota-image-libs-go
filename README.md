@@ -5,9 +5,9 @@
 [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=tier4_ota-image-libs-go&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=tier4_ota-image-libs-go)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=tier4_ota-image-libs-go&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=tier4_ota-image-libs-go)
 
-Go libraries for streaming OTA Image version 1 artifact. See [OTA Image specification Version 1](https://github.com/tier4/ota-image-libs/tree/main/docs) for the specification.
+Go libraries for streaming OTA Image version 1 artifact. See [OTA Image specification Version 1](https://github.com/tier4/ota-image-libs/tree/main/spec) for the specification.
 
-This library implements std tar library like interface for streaming files from an sequential IO stream that serving OTA image artifact.
+This library implements go standard library `tar` like interface for streaming files from an sequential IO stream that serving OTA image artifact.
 Note that this library only guarantee properly streaming OTA image artifact!
 
 ## OTA Image version 1 artifact
@@ -47,49 +47,49 @@ Example:
 package main
 
 import (
- "fmt"
- "io"
- "os"
+	"fmt"
+	"io"
+	"os"
 
- "github.com/tier4/ota-image-libs-go/artifact"
+	"github.com/tier4/ota-image-libs-go/artifact"
 )
 
 const fileToRead = "ota_image.zip"
 
 func main() {
- fmt.Printf("will read %s\n", fileToRead)
+	fmt.Printf("will read %s\n", fileToRead)
 
- f, err := os.Open(fileToRead)
- if err != nil {
-  fmt.Printf("failed to open %s: %s", fileToRead, err)
- }
- defer f.Close()
+	f, err := os.Open(fileToRead)
+	if err != nil {
+		fmt.Printf("failed to open %s: %s", fileToRead, err)
+	}
+	defer f.Close()
 
- r := artifact.NewReader(f)
+	r := artifact.NewReader(f)
 
- buf := make([]byte, 1024*1024) // 1MiB
- var i int
- for {
-  hdr, err := r.Next()
-  if err == io.EOF {
-   fmt.Printf("finish up reading! Total %d files read", i)
-   return
-  } else if err != nil {
-   fmt.Printf("failed during streaming: %s", err)
-   return
-  }
-  if !hdr.IsDir() {
-   i += 1
-  }
+	buf := make([]byte, 1024*1024) // 1MiB
+	var i int
+	for {
+		hdr, err := r.Next()
+		if err == io.EOF {
+			fmt.Printf("finish up reading! Total %d files read", i)
+			return
+		} else if err != nil {
+			fmt.Printf("failed during streaming: %s", err)
+			return
+		}
+		if !hdr.IsDir() {
+			i += 1
+		}
 
-  fmt.Printf("This header #%d: %v\n", i, hdr)
-  // reading the data of the file
-  for {
-   _, err := r.Read(buf)
-   if err == io.EOF {
-    break
-   }
-  }
- }
+		fmt.Printf("This header #%d: %v\n", i, hdr)
+		// reading the data of the file
+		for {
+			_, err := r.Read(buf)
+			if err == io.EOF {
+				break
+			}
+		}
+	}
 }
 ```
