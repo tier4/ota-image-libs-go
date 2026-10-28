@@ -71,8 +71,10 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 	var buf [fileHeaderLen]byte
 	r := zr.r
 
+	// OTA image artifact always ends with the central directory,
+	// hitting EOF before it means the stream is truncated.
 	if _, err := io.ReadFull(r, buf[:]); err != nil {
-		return nil, err
+		return nil, noEOF(err)
 	}
 	b := readBuf(buf[:])
 
@@ -101,7 +103,7 @@ func (zr *StreamReader) readLocalFileHeader() (*LocalFileHeader, error) {
 
 	d := make([]byte, filenameLen+extraLen)
 	if _, err := io.ReadFull(r, d); err != nil {
-		return nil, err
+		return nil, noEOF(err)
 	}
 	hdr.Name = string(d[:filenameLen])
 	extraField := d[filenameLen : filenameLen+extraLen]
@@ -191,8 +193,9 @@ func (fr *checksumFileStreamReader) Read(b []byte) (n int, err error) {
 	switch {
 	case err == io.EOF && nb > 0:
 		return n, io.ErrUnexpectedEOF
-	case err == nil && nb == 0:
-		// finish up reading this file, check CRC32
+	case nb == 0 && (err == nil || err == io.EOF):
+		// finish up reading this file, check CRC32.
+		// NOTE: the underlying reader might return io.EOF along with the last chunk of data.
 		if fr.hdr.CRC32 != 0 && fr.hash.Sum32() != fr.hdr.CRC32 {
 			err = ErrChecksum
 			return n, err
