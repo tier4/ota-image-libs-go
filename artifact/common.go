@@ -1,6 +1,9 @@
 package artifact
 
-import "encoding/binary"
+import (
+	"encoding/binary"
+	"io"
+)
 
 // readBuf helper for parsing header, copied from zip reader.go
 type readBuf []byte
@@ -27,4 +30,12 @@ func (b *readBuf) sub(n int) readBuf {
 	b2 := (*b)[:n]
 	*b = (*b)[n:]
 	return b2
+}
+
+// noEOF converts io.EOF to io.ErrUnexpectedEOF, copied from tar reader.go
+func noEOF(err error) error {
+	if err == io.EOF {
+		return io.ErrUnexpectedEOF
+	}
+	return err
 }
